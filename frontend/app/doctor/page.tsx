@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { User, Calendar, Activity, AlertTriangle, Clock, Bot, Video, FileText, CheckCircle2, Pill } from 'lucide-react';
+import { User, Calendar, Activity, AlertTriangle, Clock, Bot, Video, FileText, CheckCircle2, Pill, ShieldAlert } from 'lucide-react';
 
 interface Appointment {
   appointment_id: number;
@@ -59,13 +59,16 @@ export default function DoctorDashboard() {
     setLoading(true);
     try {
       const res = await axios.get(`http://localhost:8001/appointments/doctor/${doctorId}`);
-      // Sort: upcoming first, then completed by most recent
-      const sorted = res.data.appointments.sort((a: Appointment, b: Appointment) => {
+      const now = new Date().getTime();
+      
+      // Filter out past appointments (expired)
+      const futureAppts = res.data.appointments.filter((a: Appointment) => new Date(a.scheduled_time).getTime() >= now);
+      
+      // Sort: upcoming by most imminent
+      const sorted = futureAppts.sort((a: Appointment, b: Appointment) => {
         const timeA = new Date(a.scheduled_time).getTime();
         const timeB = new Date(b.scheduled_time).getTime();
-        if (a.status === 'scheduled' && b.status !== 'scheduled') return -1;
-        if (a.status !== 'scheduled' && b.status === 'scheduled') return 1;
-        return b.status === 'scheduled' ? timeA - timeB : timeB - timeA;
+        return timeA - timeB;
       });
       setAppointments(sorted);
     } catch (error) {
@@ -203,7 +206,9 @@ export default function DoctorDashboard() {
                       <div>
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Patient Dossier</p>
                         <div className="flex items-center gap-4">
-                          <img src={`https://i.pravatar.cc/150?u=${appt.appointment_id * 10}`} className="w-16 h-16 rounded-full border-2 border-gray-100 shadow-sm object-cover" />
+                          <div className="w-16 h-16 rounded-full border-2 border-gray-100 shadow-sm bg-gray-50 flex items-center justify-center text-gray-400">
+                            <User size={32} />
+                          </div>
                           <div>
                             <p className="font-extrabold text-gray-900 text-xl">{appt.patient_name}</p>
                             <p className="text-sm font-medium text-gray-500">Age: {appt.patient_age}</p>
@@ -232,22 +237,101 @@ export default function DoctorDashboard() {
                         <h3 className="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-3 flex items-center">
                           <Bot size={16} className="mr-1.5" /> AI Pre-Consultation Summary
                         </h3>
-                        <div className="bg-white rounded-xl p-4 border border-gray-100 text-gray-800 text-sm font-medium leading-relaxed shadow-sm">
-                          {appt.pre_consultation_summary}
-                        </div>
                         
-                        {isPast && (
-                          <div className="mt-5 pt-5 border-t border-gray-200 grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 flex items-center"><Activity size={14} className="mr-1 text-emerald-500"/> Diagnosis</h4>
-                              <p className="text-sm text-gray-800 font-medium bg-white p-3 rounded-xl border border-gray-100 shadow-sm">{appt.diagnosis || "No diagnosis recorded."}</p>
+                        {(() => {
+                          let aiSummaryData = null;
+                          try {
+                            aiSummaryData = JSON.parse(appt.pre_consultation_summary);
+                          } catch (e) {
+                            // Fallback if not JSON
+                            return <div className="bg-white rounded-xl p-4 border border-gray-100 text-gray-800 text-sm font-medium leading-relaxed shadow-sm whitespace-pre-wrap">{appt.pre_consultation_summary}</div>;
+                          }
+                          
+                          return (
+                            <div className="space-y-6">
+                              {/* 1. TOP-LEVEL EMERGENCY ALERT BANNER */}
+                              {aiSummaryData.alerts && (Array.isArray(aiSummaryData.alerts) ? aiSummaryData.alerts.length > 0 : true) && (
+                                <div className="bg-rose-600 text-white p-4 rounded-xl shadow-lg border border-rose-700">
+                                  <h4 className="font-extrabold flex items-center mb-2"><ShieldAlert size={18} className="mr-2"/> CRITICAL ALERTS</h4>
+                                  <ul className="list-disc pl-6 space-y-1 font-medium text-sm">
+                                    {Array.isArray(aiSummaryData.alerts) ? aiSummaryData.alerts.map((alert: string, i: number) => <li key={i}>{alert}</li>) : <li>{aiSummaryData.alerts}</li>}
+                                  </ul>
+                                </div>
+                              )}
+
+                              {/* 2. PATIENT SNAPSHOT SECTION */}
+                              {aiSummaryData.patient_snapshot && (
+                                <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                                  <h4 className="font-bold text-gray-900 border-b pb-2 mb-4 flex items-center"><User size={16} className="mr-2 text-emerald-600"/> Patient Snapshot</h4>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                      <p className="text-xs font-bold text-gray-400 uppercase">Demographics</p>
+                                      <p className="font-medium text-gray-800 text-sm mb-3">{aiSummaryData.patient_snapshot.demographics}</p>
+                                      <p className="text-xs font-bold text-gray-400 uppercase">Primary Complaints (HPI)</p>
+                                      <ul className="list-disc pl-4 text-sm text-gray-800 mb-3">
+                                        {Array.isArray(aiSummaryData.patient_snapshot.primary_complaints) ? aiSummaryData.patient_snapshot.primary_complaints.map((c: string, i: number) => <li key={i}>{c}</li>) : <li>{aiSummaryData.patient_snapshot.primary_complaints}</li>}
+                                      </ul>
+                                      <p className="text-xs font-bold text-gray-400 uppercase">Associated Symptoms</p>
+                                      <ul className="list-disc pl-4 text-sm text-gray-800">
+                                        {Array.isArray(aiSummaryData.patient_snapshot.associated_symptoms) ? aiSummaryData.patient_snapshot.associated_symptoms.map((c: string, i: number) => <li key={i}>{c}</li>) : <li>{aiSummaryData.patient_snapshot.associated_symptoms}</li>}
+                                      </ul>
+                                    </div>
+                                    <div>
+                                      <p className="text-xs font-bold text-gray-400 uppercase">Physical Exam / Observations</p>
+                                      <ul className="list-disc pl-4 text-sm text-gray-800 mb-3">
+                                        {Array.isArray(aiSummaryData.patient_snapshot.physical_exam) ? aiSummaryData.patient_snapshot.physical_exam.map((c: string, i: number) => <li key={i}>{c}</li>) : <li>{aiSummaryData.patient_snapshot.physical_exam}</li>}
+                                      </ul>
+                                      <p className="text-xs font-bold text-gray-400 uppercase">Relevant Chronic History</p>
+                                      <ul className="list-disc pl-4 text-sm text-gray-800">
+                                        {Array.isArray(aiSummaryData.patient_snapshot.chronic_history) ? aiSummaryData.patient_snapshot.chronic_history.map((c: string, i: number) => <li key={i}>{c}</li>) : <li>{aiSummaryData.patient_snapshot.chronic_history}</li>}
+                                      </ul>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* 3. GROUPED ACTIVE PRESCRIPTIONS */}
+                              {Array.isArray(aiSummaryData.active_prescriptions) && aiSummaryData.active_prescriptions.length > 0 && (
+                                <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                                  <h4 className="font-bold text-gray-900 border-b pb-2 mb-4 flex items-center"><Pill size={16} className="mr-2 text-blue-500"/> Relevant Prescriptions</h4>
+                                  <div className="space-y-4">
+                                    {aiSummaryData.active_prescriptions.map((group: any, i: number) => (
+                                      <div key={i} className="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                                        <h5 className="font-bold text-blue-700 text-sm mb-2">{group.category}</h5>
+                                        <div className="space-y-2">
+                                          {Array.isArray(group.medications) ? group.medications.map((med: any, j: number) => (
+                                            <div key={j} className="flex flex-wrap items-center gap-2 text-sm bg-white p-2 rounded shadow-sm border border-gray-50">
+                                              <span className="font-bold text-gray-800">{med.name}</span>
+                                              <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs">{med.dosage}</span>
+                                              <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs">{med.frequency}</span>
+                                            </div>
+                                          )) : <p className="text-sm">{group.medications}</p>}
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* 4. RELEVANT INVESTIGATIONS */}
+                              {Array.isArray(aiSummaryData.pending_investigations) && aiSummaryData.pending_investigations.length > 0 && (
+                                <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                                  <h4 className="font-bold text-gray-900 border-b pb-2 mb-4 flex items-center"><Activity size={16} className="mr-2 text-purple-500"/> Relevant Investigations (From Documents)</h4>
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {aiSummaryData.pending_investigations.map((inv: any, i: number) => (
+                                      <div key={i} className="bg-purple-50 border border-purple-100 p-3 rounded-lg">
+                                        <h5 className="font-bold text-purple-700 text-sm mb-1">{inv.category}</h5>
+                                        <ul className="list-disc pl-4 text-xs text-purple-900 font-medium">
+                                          {Array.isArray(inv.tests) ? inv.tests.map((test: string, j: number) => <li key={j}>{test}</li>) : <li>{inv.tests}</li>}
+                                        </ul>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
                             </div>
-                            <div>
-                              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 flex items-center"><Pill size={14} className="mr-1 text-blue-500"/> Prescription</h4>
-                              <p className="text-sm text-gray-800 font-medium bg-white p-3 rounded-xl border border-gray-100 shadow-sm">{appt.prescription || "No prescription recorded."}</p>
-                            </div>
-                          </div>
-                        )}
+                          );
+                        })()}
                       </div>
 
                     </div>

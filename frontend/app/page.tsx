@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
-import { FileUp, User, Activity, ShieldAlert, Pill, CalendarCheck, HeartPulse, Bot, Star, MessageSquareQuote, CheckCircle2, ArrowRight } from 'lucide-react';
+import { FileUp, User, Activity, ShieldAlert, Pill, CalendarCheck, Calendar, ChevronLeft, HeartPulse, Bot, Star, MessageSquareQuote, CheckCircle2, ArrowRight } from 'lucide-react';
 import { useGoogleLogin } from '@react-oauth/google';
 
 export default function Home() {
@@ -155,6 +155,26 @@ export default function Home() {
               </div>
             </div>
 
+            {/* Integrations Section */}
+            <div className="pt-4 border-t border-gray-100">
+              <h3 className="text-lg font-bold text-gray-900 flex items-center mb-4 pb-2"><Calendar className="mr-2 text-blue-500" size={20}/> Integrations</h3>
+              <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 flex items-center justify-between">
+                <div>
+                  <p className="font-bold text-blue-900 text-sm">Google Calendar Auto-Sync</p>
+                  <p className="text-blue-700 text-xs">Allow MedMate to automatically add doctor appointments to your calendar.</p>
+                </div>
+                {formData.google_access_token ? (
+                  <span className="px-3 py-1 bg-green-100 text-green-700 font-bold rounded-full text-xs flex items-center">
+                    <CheckCircle2 size={14} className="mr-1"/> Connected
+                  </span>
+                ) : (
+                  <button type="button" onClick={() => loginWithGoogle()} className="px-4 py-2 bg-white text-blue-600 font-bold border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors text-sm shadow-sm">
+                    Connect
+                  </button>
+                )}
+              </div>
+            </div>
+
             <button type="submit" disabled={loading} className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors">
               {loading ? 'Processing...' : 'Complete Registration'}
             </button>
@@ -190,7 +210,6 @@ export default function Home() {
       <section className="relative overflow-hidden bg-gradient-to-b from-emerald-900 to-teal-900 text-white py-24 px-6 text-center">
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
         <div className="max-w-4xl mx-auto relative z-10">
-          <span className="bg-emerald-500/20 text-emerald-200 px-4 py-1.5 rounded-full text-sm font-bold uppercase tracking-widest border border-emerald-500/30 inline-block mb-6">Australia's #1 AI Telehealth Platform</span>
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-tight">
             Your online home for <br className="hidden md:block"/><span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-200">healthcare 24/7.</span>
           </h1>
@@ -312,6 +331,3 @@ export default function Home() {
   );
 }
 
-function ChevronLeft(props: any) {
-  return <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="m15 18-6-6 6-6"/></svg>
-}

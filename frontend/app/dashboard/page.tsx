@@ -480,35 +480,7 @@ function DashboardContent() {
           </div>
 
           {/* Past History & Uploads Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-            {/* Past Appointments */}
-            <div className="bg-white rounded-3xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100">
-              <h3 className="font-bold text-gray-800 mb-5 text-lg">Past Visits</h3>
-              {pastAppts.length > 0 ? (
-                <ul className="space-y-4">
-                  {pastAppts.map(a => (
-                    <li key={a.id} onClick={() => setSelectedPastAppt(a)} className="flex justify-between items-center text-sm p-3 hover:bg-slate-50 rounded-xl transition-colors cursor-pointer border border-transparent hover:border-gray-200">
-                      <div className="flex items-center">
-                        <div className="bg-emerald-100 p-2 rounded-full mr-3 text-emerald-600">
-                          <User size={16}/>
-                        </div>
-                        <div>
-                          <p className="font-bold text-gray-900">{a.doctor_name}</p>
-                          <p className="text-emerald-600 font-medium text-xs">{a.doctor_specialization}</p>
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end">
-                        <span className="text-gray-400 text-xs font-medium bg-white px-2 py-1 rounded shadow-sm border border-gray-100 mb-1">{new Date(a.scheduled_time).toLocaleDateString()}</span>
-                        <span className="text-[10px] text-blue-500 font-semibold underline">View notes</span>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-gray-400 italic text-center py-4">No past records found.</p>
-              )}
-            </div>
-
+          <div className="grid grid-cols-1 gap-6 pt-2">
             {/* Upload Records */}
             <div onClick={() => setShowDocsModal(true)} className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 flex flex-col items-center text-center justify-center group cursor-pointer hover:border-emerald-300 hover:shadow-xl transition-all duration-300">
               <div className="bg-emerald-50 p-5 rounded-full mb-4 group-hover:scale-110 group-hover:bg-emerald-100 transition-all duration-300">

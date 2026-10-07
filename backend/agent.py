@@ -57,11 +57,86 @@ def book_appointment(args_str: str) -> str:
         import urllib.parse
         
         db = SessionLocal()
+        
+        # Auto-inject the structured health profile and uploaded documents into the summary
+        patient = db.query(models.Patient).filter(models.Patient.id == p_id).first()
+        med_hist = db.query(models.MedicalHistory).filter(models.MedicalHistory.patient_id == p_id).first()
+        docs = db.query(models.Document).filter(models.Document.patient_id == p_id).all()
+        
+        docs_context = ""
+        if docs:
+            docs_context = "\n".join([f"Document [{d.filename}]: {d.layman_summary}" for d in docs])
+            
+        profile_context = ""
+        if med_hist:
+            profile_context = f"Chronic Conditions: {med_hist.chronic_conditions}\nMedications: {med_hist.medications}\nAllergies: {med_hist.allergies}"
+            
+        # Use LLM to synthesize only RELEVANT information based on current HPI
+        synthesis_prompt = f"""You are a clinical synthesis AI.
+A patient is booking an appointment. The triage agent has summarized their current complaint (HPI) below:
+{summary}
+
+Patient's Full Health Profile:
+{profile_context}
+
+Patient's Uploaded Documents:
+{docs_context if docs_context else "None"}
+
+Your task: Output a highly structured JSON clinical note for the doctor.
+1. Include the HPI (History of Present Illness) in the patient_snapshot.
+2. ALWAYS include Allergies in the alerts, even if not relevant, for safety.
+3. INCLUDE Chronic Conditions and Medications ONLY if they are relevant to the current complaint.
+4. From the Uploaded Documents, extract and summarize ONLY the information that is highly relevant to the patient's current condition. Include this in the pending_investigations or a general notes section.
+
+You MUST output ONLY valid JSON using exactly this schema:
+{{
+  "alerts": ["list of critical warnings like severe allergies, abnormal vitals"],
+  "patient_snapshot": {{
+    "demographics": "String",
+    "primary_complaints": ["String (HPI summary)"],
+    "associated_symptoms": ["String"],
+    "physical_exam": ["String"],
+    "chronic_history": ["String (Relevant only)"]
+  }},
+  "active_prescriptions": [
+    {{
+      "category": "String",
+      "medications": [
+        {{"name": "String", "dosage": "String", "frequency": "String", "timing": "String", "duration": "String"}}
+      ]
+    }}
+  ],
+  "pending_investigations": [
+    {{
+      "category": "String (e.g. From Document [Name])",
+      "tests": ["String (Relevant findings)"]
+    }}
+  ],
+  "instructions": ["String"],
+  "follow_up": "String"
+}}"""
+        try:
+            response = llm.invoke([HumanMessage(content=synthesis_prompt)])
+            raw_content = response.content
+            if isinstance(raw_content, list):
+                final_summary = "".join([b.get("text", "") if isinstance(b, dict) else str(b) for b in raw_content])
+            else:
+                final_summary = str(raw_content)
+                
+            # clean ticks if present
+            import re
+            final_summary = re.sub(r"^```(?:json|markdown)?\s*", "", final_summary, flags=re.IGNORECASE)
+            final_summary = re.sub(r"\s*```$", "", final_summary)
+            final_summary = final_summary.strip()
+        except Exception:
+            # Fallback if LLM fails
+            final_summary = summary + "\n\n--- 🏥 HEALTH PROFILE (Fallback) ---\n" + profile_context
+        
         appt = schemas.AppointmentCreate(
             patient_id=p_id, 
             doctor_id=d_id, 
             scheduled_time=sch_time, 
-            pre_consultation_summary=summary
+            pre_consultation_summary=final_summary
         )
         created = crud.create_appointment(db, appt)
         
@@ -103,10 +178,10 @@ def book_appointment(args_str: str) -> str:
         
         cal_url = f"https://calendar.google.com/calendar/render?action=TEMPLATE"
         cal_url += f"&text={urllib.parse.quote('MedMate Consultation: ' + doc_name)}"
-        cal_url += f"&details={urllib.parse.quote('Pre-consultation summary: ' + summary)}"
+        cal_url += f"&details={urllib.parse.quote('MedMate Telehealth Appointment.')}"
         cal_url += f"&dates={start_fmt}/{end_fmt}"
         
-        return f"SUCCESS: Appointment {created.id} booked. Failed to auto-sync calendar. Google Calendar Link fallback: {cal_url}"
+        return f"SUCCESS: Appointment {created.id} booked. IMPORTANT: You MUST output this EXACT Google Calendar link so the patient can click it to add to their calendar manually: {cal_url}"
     except Exception as e:
         return f"Booking failed: {str(e)}"
 
@@ -155,12 +230,13 @@ You are an intelligent, empathetic medical triage assistant.
 You assess symptoms based on the patient's medical history.
 
 CRITICAL RULE: DO NOT show doctors or book appointments immediately. 
-Step 1: Talk to the patient. Ask 1 or 2 clarifying questions about their current symptoms to fully understand the problem (duration, severity, related symptoms).
+Step 1: Talk to the patient. Ask 1 or 2 clarifying questions about their current symptoms to fully understand the problem (duration, severity on a scale of 1-10, related symptoms).
 Step 2: Once you understand the problem, assess the severity.
-Step 3: If CRITICAL or LIFE-THREATENING, use the escalate_to_emergency tool immediately.
-Step 4: If mild/moderate, use the get_registered_doctors tool. Present the best doctors along with their bios. YOU MUST add the exact text `[SHOW_CAROUSEL]` at the very end of your message.
-Step 5: Ask the patient to confirm a doctor and a time (YYYY-MM-DD HH:MM).
-Step 6: Use the book_appointment tool. YOU MUST WRITE A HIGHLY DETAILED CLINICAL NOTE FOR THE SUMMARY. Do not write a one-liner. You MUST include:
+Step 3: If CRITICAL or LIFE-THREATENING (Severity 8-10), use the escalate_to_emergency tool immediately.
+Step 4: If VERY MILD (Severity 1-3, e.g., mild headache, minor cold, small scrape): Provide safe home remedies, lifestyle advice, and general over-the-counter guidelines based STRICTLY on official protocols from the WHO, ICMR, or the Indian Ministry of Health and Family Welfare. You MUST include a brief disclaimer that this is general health advice and not a substitute for professional medical evaluation. Ask if they feel they still need to see a doctor.
+Step 5: If MODERATE (Severity 4-7) or if a patient with mild symptoms requests to see a doctor, use the get_registered_doctors tool. Present the best doctors along with their bios. YOU MUST add the exact text `[SHOW_CAROUSEL]` at the very end of your message.
+Step 6: Ask the patient to confirm a doctor and a time (YYYY-MM-DD HH:MM). CRITICAL: You MUST book the exact doctor the user chooses. Do not override their choice.
+Step 7: Use the book_appointment tool. YOU MUST WRITE A HIGHLY DETAILED CLINICAL NOTE FOR THE SUMMARY. Do not write a one-liner. You MUST include:
   - History of Present Illness (HPI)
   - Past Medical History (PMH)
   - Summarize any relevant Uploaded Documents or Reports found in the patient's history context.
