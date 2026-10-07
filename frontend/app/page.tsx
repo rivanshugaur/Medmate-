@@ -196,7 +196,6 @@ export default function Home() {
           </div>
           <div className="hidden md:flex gap-6 items-center">
             <a href="#features" className="text-sm font-bold text-gray-600 hover:text-emerald-600">Features</a>
-            <a href="#reviews" className="text-sm font-bold text-gray-600 hover:text-emerald-600">Patient Reviews</a>
             <a href="http://localhost:3000/doctor" className="text-sm font-bold text-blue-600 bg-blue-50 px-4 py-2 rounded-full hover:bg-blue-100 transition-colors">Provider Portal</a>
           </div>
           <div className="flex gap-3">
@@ -214,7 +213,7 @@ export default function Home() {
             Your online home for <br className="hidden md:block"/><span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-200">healthcare 24/7.</span>
           </h1>
           <p className="text-lg md:text-xl text-teal-100 mb-10 max-w-2xl mx-auto font-medium">
-            Skip the waiting room. Chat with our AI triage assistant, get a personalized emergency dossier, and instantly book consultations with top Australian registered doctors.
+            Skip the waiting room. Chat with our AI triage assistant, get a personalized emergency dossier, and instantly book consultations with top registered doctors.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button onClick={() => setView('register')} className="bg-white text-teal-900 font-extrabold px-8 py-4 rounded-full hover:scale-105 transition-transform flex items-center justify-center shadow-2xl shadow-emerald-900/50">
@@ -263,34 +262,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Patient Reviews Section */}
-      <section id="reviews" className="bg-teal-900 py-24 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-extrabold text-white mb-4">Trusted by Thousands</h2>
-            <p className="text-teal-200 max-w-2xl mx-auto text-lg">Read reviews from real patients who have used MedMate to get fast, reliable care.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { name: "Priya S.", review: "The AI triage was incredible. It asked me questions I didn't even think of, and by the time I spoke to Dr. Jones, he already knew exactly what was wrong. The 1-click summary feature is a lifesaver.", img: "https://i.pravatar.cc/150?img=47" },
-              { name: "Ramesh K.", review: "I needed a prescription refill for my diabetes medication. The quick-start tiles on the dashboard let me book an appointment with Dr. Emily in literally 30 seconds. Best healthcare app in Australia.", img: "https://i.pravatar.cc/150?img=11" },
-              { name: "Anita M.", review: "I was feeling terrible at 2 AM. The AI bot was online instantly to reassure me and book a morning slot with a Neurologist. The interface is gorgeous and incredibly easy to use.", img: "https://i.pravatar.cc/150?img=44" }
-            ].map((r, i) => (
-              <div key={i} className="bg-white rounded-3xl p-8 relative">
-                <MessageSquareQuote size={40} className="text-emerald-100 absolute top-6 right-6"/>
-                <div className="flex text-yellow-400 mb-4"><Star className="fill-current" size={16}/><Star className="fill-current" size={16}/><Star className="fill-current" size={16}/><Star className="fill-current" size={16}/><Star className="fill-current" size={16}/></div>
-                <p className="text-gray-700 italic mb-6">"{r.review}"</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full border-2 border-emerald-100 bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-lg">
-                    {r.name.charAt(0)}
-                  </div>
-                  <span className="font-bold text-gray-900">{r.name}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Feedback Section */}
       <section className="py-24 px-6 bg-white">
@@ -324,7 +295,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="bg-slate-900 text-slate-400 py-12 px-6 text-center text-sm">
-        <p className="mb-2 font-bold text-slate-300 flex items-center justify-center"><HeartPulse className="text-emerald-500 mr-2" size={18}/> MedMate Australia Pty Ltd</p>
+        <p className="mb-2 font-bold text-slate-300 flex items-center justify-center"><HeartPulse className="text-emerald-500 mr-2" size={18}/> MedMate Solutions</p>
         <p>© 2026 All Rights Reserved. This is a demonstration portal.</p>
       </footer>
     </div>
