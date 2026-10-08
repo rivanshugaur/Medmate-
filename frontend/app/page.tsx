@@ -45,7 +45,7 @@ export default function Home() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await axios.post(\`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/patients/login`, { email: loginEmail });
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/patients/login`, { email: loginEmail });
       if (rememberMe) localStorage.setItem('medmate_patient_id', res.data.id);
       router.push(`/dashboard?patient_id=${res.data.id}`);
     } catch (error) {
@@ -69,7 +69,7 @@ export default function Home() {
           medications: formData.medications || 'None', allergies: formData.allergies || 'None'
         }
       };
-      const res = await axios.post(\`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/patients/`, payload);
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/patients/`, payload);
       const patientId = res.data.id;
       await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/sync-rag/${patientId}`);
       router.push(`/dashboard?patient_id=${patientId}`);

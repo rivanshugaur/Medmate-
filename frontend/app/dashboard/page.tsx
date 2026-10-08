@@ -244,7 +244,7 @@ function DashboardContent() {
     setLoading(true);
 
     try {
-      const res = await axios.post(\`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/chat`, {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/chat`, {
         patient_id: parseInt(patientId),
         message: userMsg,
         history: messages.slice(1).map(m => ({ role: m.role, content: m.content.replace('[SHOW_CAROUSEL]', '') }))
@@ -558,7 +558,7 @@ function DashboardContent() {
                       onSlotBook={(msg) => {
                         setMessages(prev => [...prev, { role: 'user', content: msg }]);
                         setLoading(true);
-                        axios.post(\`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/chat`, {
+                        axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/chat`, {
                           patient_id: parseInt(patientId!),
                           message: msg,
                           history: messages.map(m => ({ role: m.role, content: m.content.replace('[SHOW_CAROUSEL]', '') }))
