@@ -32,7 +32,7 @@ function ChatInterface() {
     setLoading(true);
 
     try {
-      const res = await axios.post('http://localhost:8001/chat', {
+      const res = await axios.post(\`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/chat`, {
         patient_id: parseInt(patientId),
         message: userMsg,
         history: messages.slice(1) // exclude the first greeting message to save context

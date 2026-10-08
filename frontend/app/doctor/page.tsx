@@ -58,7 +58,7 @@ export default function DoctorDashboard() {
   const fetchAppointments = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`http://localhost:8001/appointments/doctor/${doctorId}`);
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/appointments/doctor/${doctorId}`);
       const now = new Date().getTime();
       
       // Filter out past appointments (expired)

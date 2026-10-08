@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Execution Roadmap</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: white; }
+        .grid-bg { background-image: repeating-linear-gradient(90deg, transparent, transparent calc(100% / 14 - 1px), #f3f4f6 calc(100% / 14 - 1px), #f3f4f6 calc(100% / 14)); }
+        .pill { border-radius: 9999px; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; border: 2px solid; padding: 0.25rem 1rem; color: #1f2937; letter-spacing: 0.05em; height: 1.75rem;}
+        .col-w { width: calc(100% / 14); }
+        .row-task { height: 2.5rem; display: flex; align-items: center; position: relative; }
+        .task-label { width: 300px; text-align: right; padding-right: 1.5rem; font-size: 0.75rem; font-weight: 500; color: #374151; flex-shrink: 0;}
+        
+        /* Original Colors */
+        .c-setup { background: #e0e7ff; border-color: #a5b4fc; }
+        .c-auth { background: #e0e7ff; border-color: #a5b4fc; }
+        .c-core1 { background: #ccfbf1; border-color: #5eead4; }
+        .c-safety { background: #dcfce7; border-color: #86efac; }
+        .c-data { background: #e0e7ff; border-color: #a5b4fc; }
+        .c-nlp { background: #e0e7ff; border-color: #a5b4fc; }
+        .c-storage { background: #f3e8ff; border-color: #d8b4fe; }
+        .c-core2 { background: #f3e8ff; border-color: #d8b4fe; }
+        .c-qa { background: #f1f5f9; border-color: #cbd5e1; }
+        
+        /* Completed style overwrite */
+        .done { position: relative; }
+        .done::after { content: '✓'; position: absolute; right: -18px; color: #10b981; font-weight: bold; font-size: 0.9rem;}
+        .active-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; border-color: #3b82f6 !important; box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .7; } }
+    </style>
+</head>
+<body class="p-8">
+    <div class="max-w-6xl mx-auto bg-white p-6 relative">
+        <div class="mb-8 pl-[300px]">
+            <h1 class="text-xl font-extrabold text-gray-900 tracking-tight">PROPOSED PROJECT EXECUTION ROADMAP</h1>
+            <p class="text-xs text-gray-500 font-medium mt-1">14-Week Phased Milestones • AI Healthcare Assistance & Monitoring Platform</p>
+        </div>
+        
+        <div class="relative flex">
+            <!-- Labels Column -->
+            <div class="w-[300px] flex-shrink-0 flex flex-col justify-between pt-4 pb-8 z-10 bg-white">
+                <div class="row-task"><div class="task-label">System Setup & DB Architecture</div></div>
+                <div class="row-task"><div class="task-label">Patient & Doctor Authentication</div></div>
+                <div class="row-task"><div class="task-label">Voice & Text Medical Chatbot</div></div>
+                <div class="row-task"><div class="task-label">In-App Doctor Booking & Calendar Sync</div></div>
+                <div class="row-task"><div class="task-label">Auto Patient Briefing Sent to Doctor</div></div>
+                <div class="row-task"><div class="task-label">Emergency Red-Flag & Family Alert</div></div>
+                <div class="row-task"><div class="task-label">Mid-Semester Evaluation & Demo</div></div>
+                <div class="row-task"><div class="task-label">Lab Report Ingestion & OCR Extraction</div></div>
+                <div class="row-task"><div class="task-label">Plain-Language Summary for Patient</div></div>
+                <div class="row-task"><div class="task-label">Health Vault Database Sync</div></div>
+                <div class="row-task"><div class="task-label">One-Click Emergency History Portal</div></div>
+                <div class="row-task"><div class="task-label">Doctor Digital Prescription Workflow</div></div>
+                <div class="row-task"><div class="task-label">System Integration & Security Audit</div></div>
+                <div class="row-task"><div class="task-label">Final Project Report & Viva Defense</div></div>
+            </div>
+
+            <!-- Chart Area -->
+            <div class="flex-grow relative grid-bg pt-4 pb-8 border-l border-gray-100">
+                
+                <!-- Mid Term Line -->
+                <div class="absolute top-0 bottom-0 left-[50%] border-l border-dashed border-red-400 z-0">
+                    <span class="absolute -top-6 left-[-60px] text-[0.6rem] font-bold text-red-500 w-[120px] text-center">MID-TERM EVALUATION</span>
+                </div>
+
+                <!-- Rows -->
+                <div class="row-task z-10"><div class="pill c-setup done ml-[0%] w-[7.14%]">SETUP</div></div>
+                <div class="row-task z-10"><div class="pill c-auth done ml-[7.14%] w-[7.14%]">AUTH</div></div>
+                <div class="row-task z-10"><div class="pill c-core1 done ml-[14.28%] w-[14.28%]">CORE</div></div>
+                <div class="row-task z-10"><div class="pill c-core1 done ml-[21.42%] w-[14.28%]">CORE</div></div>
+                <div class="row-task z-10"><div class="pill c-core1 done ml-[28.56%] w-[14.28%]">CORE</div></div>
+                <div class="row-task z-10"><div class="pill c-safety done ml-[35.7%] w-[14.28%]">SAFETY</div></div>
+                <div class="row-task z-10"><div class="pill bg-red-100 border-red-300 text-red-800 done ml-[42.84%] w-[7.14%]">MILESTONE</div></div>
+                <div class="row-task z-10"><div class="pill c-data done ml-[50%] w-[14.28%]">DATA</div></div>
+                <div class="row-task z-10"><div class="pill c-nlp done ml-[57.14%] w-[14.28%]">NLP</div></div>
+                <div class="row-task z-10"><div class="pill c-storage done ml-[64.28%] w-[14.28%]">STORAGE</div></div>
+                <div class="row-task z-10"><div class="pill c-storage done ml-[71.42%] w-[14.28%]">SAFETY</div></div>
+                <div class="row-task z-10"><div class="pill c-core2 done ml-[78.56%] w-[14.28%]">CORE</div></div>
+                <div class="row-task z-10"><div class="pill c-qa done ml-[85.7%] w-[14.28%]">QA</div></div>
+                <div class="row-task z-10"><div class="pill bg-white border-gray-400 active-pulse ml-[92.84%] w-[7.14%]">MILESTONE</div></div>
+            </div>
+        </div>
+
+        <!-- X-axis Labels -->
+        <div class="flex pl-[300px] border-t border-gray-100 pt-2 text-[0.6rem] font-bold text-gray-400 text-center">
+            <div class="w-[7.14%]">W01</div>
+            <div class="w-[7.14%]">W02</div>
+            <div class="w-[7.14%]">W03</div>
+            <div class="w-[7.14%]">W04</div>
+            <div class="w-[7.14%]">W05</div>
+            <div class="w-[7.14%]">W06</div>
+            <div class="w-[7.14%]">W07</div>
+            <div class="w-[7.14%]">W08</div>
+            <div class="w-[7.14%]">W09</div>
+            <div class="w-[7.14%]">W10</div>
+            <div class="w-[7.14%]">W11</div>
+            <div class="w-[7.14%]">W12</div>
+            <div class="w-[7.14%]">W13</div>
+            <div class="w-[7.14%]">W14</div>
+        </div>
+        
+        <div class="text-center mt-6 text-gray-700 italic text-sm font-serif">
+            Figure 3: Engineering Execution Roadmap — 14-Week Phased Milestones (Updated)
+        </div>
+    </div>
+</body>
+</html>

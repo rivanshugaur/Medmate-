@@ -188,7 +188,7 @@ function DashboardContent() {
   const fetchDocuments = async () => {
     if (!patientId) return;
     try {
-      const res = await axios.get(`http://localhost:8001/patients/${patientId}/documents`);
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/patients/${patientId}/documents`);
       setDocuments(res.data.documents);
     } catch (e) {
       console.error(e);
@@ -197,7 +197,7 @@ function DashboardContent() {
 
   useEffect(() => {
     if (patientId) {
-      axios.get(`http://localhost:8001/patients/${patientId}/dashboard`)
+      axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/patients/${patientId}/dashboard`)
         .then(res => setData(res.data))
         .catch(err => console.error(err));
       fetchDocuments();
@@ -230,7 +230,7 @@ function DashboardContent() {
 
   const refreshDashboard = async () => {
     if (!patientId) return;
-    const newData = await axios.get(`http://localhost:8001/patients/${patientId}/dashboard`);
+    const newData = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/patients/${patientId}/dashboard`);
     setData(newData.data);
   };
 
@@ -244,7 +244,7 @@ function DashboardContent() {
     setLoading(true);
 
     try {
-      const res = await axios.post('http://localhost:8001/chat', {
+      const res = await axios.post(\`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/chat`, {
         patient_id: parseInt(patientId),
         message: userMsg,
         history: messages.slice(1).map(m => ({ role: m.role, content: m.content.replace('[SHOW_CAROUSEL]', '') }))
@@ -263,7 +263,7 @@ function DashboardContent() {
     e.preventDefault();
     if (!patientId) return;
     try {
-      await axios.put(`http://localhost:8001/patients/${patientId}`, {
+      await axios.put(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/patients/${patientId}`, {
         name: editForm.name,
         age: parseInt(editForm.age),
         gender: editForm.gender,
@@ -290,7 +290,7 @@ function DashboardContent() {
     
     setUploadingDoc(true);
     try {
-      const res = await axios.post(`http://localhost:8001/patients/${patientId}/documents`, formData, {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/patients/${patientId}/documents`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       setExpandedDocs(prev => new Set(prev).add(res.data.document_id));
@@ -306,7 +306,7 @@ function DashboardContent() {
   const handleDeleteDocument = async (docId: number) => {
     if (!patientId || !confirm("Are you sure you want to delete this report?")) return;
     try {
-      await axios.delete(`http://localhost:8001/patients/${patientId}/documents/${docId}`);
+      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/patients/${patientId}/documents/${docId}`);
       await fetchDocuments();
     } catch (error) {
       alert("Failed to delete document.");
@@ -328,7 +328,7 @@ function DashboardContent() {
     setLoadingSummary(true);
     setAiSummaryData(null);
     try {
-      const res = await axios.get(`http://localhost:8001/patients/${patientId}/generate-summary`);
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/patients/${patientId}/generate-summary`);
       setAiSummaryData(res.data.summary);
     } catch (e) {
       setAiSummaryData("Failed to generate summary.");
@@ -558,7 +558,7 @@ function DashboardContent() {
                       onSlotBook={(msg) => {
                         setMessages(prev => [...prev, { role: 'user', content: msg }]);
                         setLoading(true);
-                        axios.post('http://localhost:8001/chat', {
+                        axios.post(\`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/chat`, {
                           patient_id: parseInt(patientId!),
                           message: msg,
                           history: messages.map(m => ({ role: m.role, content: m.content.replace('[SHOW_CAROUSEL]', '') }))
@@ -875,7 +875,7 @@ function DashboardContent() {
                               {expandedDocs.has(doc.id) ? "Hide Summary" : "Show Summary"}
                             </button>
                             {doc.file_url && (
-                              <a href={`http://localhost:8001${doc.file_url}`} target="_blank" rel="noopener noreferrer" className="bg-indigo-50 text-indigo-600 p-2 rounded-lg hover:bg-indigo-100 transition" title="View Original">
+                              <a href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}${doc.file_url}`} target="_blank" rel="noopener noreferrer" className="bg-indigo-50 text-indigo-600 p-2 rounded-lg hover:bg-indigo-100 transition" title="View Original">
                                 <Eye size={16}/>
                               </a>
                             )}
