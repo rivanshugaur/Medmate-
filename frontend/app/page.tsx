@@ -69,8 +69,9 @@ export default function Home() {
       const patientId = res.data.id;
       await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/sync-rag/${patientId}`);
       router.push(`/dashboard?patient_id=${patientId}`);
-    } catch (error) {
-      alert('Error registering patient. Is the backend running?');
+    } catch (error: any) {
+      const errMsg = error.response?.data?.detail || 'Error registering patient. Please check your network connection.';
+      alert(errMsg);
       setLoading(false);
     }
   };

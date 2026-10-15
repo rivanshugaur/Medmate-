@@ -29,6 +29,9 @@ def read_root():
 
 @app.post("/patients/", response_model=schemas.Patient)
 def create_patient(patient: schemas.PatientCreate, db: Session = Depends(get_db)):
+    existing = db.query(models.Patient).filter(models.Patient.email == patient.email).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="An account with this email already exists. Please log in.")
     return crud.create_patient(db=db, patient=patient)
 
 @app.post("/patients/login")
