@@ -10,6 +10,7 @@ def create_patient(db: Session, patient: schemas.PatientCreate):
         age=patient.age,
         gender=patient.gender,
         email=patient.email,
+        password=patient.password,
         emergency_contact_name=patient.emergency_contact_name,
         emergency_contact_phone=patient.emergency_contact_phone,
         primary_doctor_id=patient.primary_doctor_id,

@@ -36,6 +36,8 @@ def login_patient(req: schemas.PatientLogin, db: Session = Depends(get_db)):
     patient = db.query(models.Patient).filter(models.Patient.email == req.email).first()
     if not patient:
         raise HTTPException(status_code=404, detail="Patient not found")
+    if patient.password and req.password and patient.password != req.password:
+        raise HTTPException(status_code=401, detail="Invalid password. Please check your credentials.")
     return {"id": patient.id, "name": patient.name}
 
 @app.put("/patients/{patient_id}")

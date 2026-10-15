@@ -13,6 +13,7 @@ class PatientBase(BaseModel):
     age: int
     gender: str
     email: str
+    password: Optional[str] = None
     emergency_contact_name: Optional[str] = None
     emergency_contact_phone: Optional[str] = None
     primary_doctor_id: Optional[int] = None
@@ -23,6 +24,7 @@ class PatientCreate(PatientBase):
 
 class PatientLogin(BaseModel):
     email: str
+    password: Optional[str] = None
 
 class PatientUpdate(BaseModel):
     name: str

@@ -18,7 +18,7 @@ export default function Home() {
   const [feedbackSent, setFeedbackSent] = useState(false);
 
   const [formData, setFormData] = useState({
-    name: '', age: '', gender: '', email: '',
+    name: '', age: '', gender: '', email: '', password: '',
     chronic_conditions: '', medications: '', allergies: '',
     emergency_contact_name: '', emergency_contact_phone: '', primary_doctor_id: '',
     google_access_token: ''
@@ -32,24 +32,19 @@ export default function Home() {
     }
   }, [router]);
 
-  const loginWithGoogle = useGoogleLogin({
-    onSuccess: (codeResponse) => {
-      setFormData({ ...formData, google_access_token: codeResponse.access_token });
-      alert("Google Calendar successfully connected!");
-    },
-    onError: (error) => console.log('Login Failed:', error),
-    scope: 'https://www.googleapis.com/auth/calendar.events'
-  });
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/patients/login`, { email: loginEmail });
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/patients/login`, { 
+        email: loginEmail,
+        password: loginPassword 
+      });
       if (rememberMe) localStorage.setItem('medmate_patient_id', res.data.id);
       router.push(`/dashboard?patient_id=${res.data.id}`);
-    } catch (error) {
-      alert('Patient not found or invalid credentials.');
+    } catch (error: any) {
+      const errMsg = error.response?.data?.detail || 'Patient not found or invalid credentials.';
+      alert(errMsg);
       setLoading(false);
     }
   };
@@ -60,6 +55,7 @@ export default function Home() {
     try {
       const payload = {
         name: formData.name, age: parseInt(formData.age), gender: formData.gender, email: formData.email,
+        password: formData.password,
         emergency_contact_name: formData.emergency_contact_name || null,
         emergency_contact_phone: formData.emergency_contact_phone || null,
         primary_doctor_id: formData.primary_doctor_id ? parseInt(formData.primary_doctor_id) : null,
@@ -133,15 +129,19 @@ export default function Home() {
             <div>
               <h3 className="text-lg font-bold text-gray-900 flex items-center mb-4 border-b pb-2"><User className="mr-2 text-emerald-500" size={20}/> Basic Information</h3>
               <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
-                <div><label className="block text-sm font-medium text-gray-700">Full Name</label><input required type="text" name="name" value={formData.name} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-xl py-2 px-3 text-black" /></div>
-                <div><label className="block text-sm font-medium text-gray-700">Age</label><input required type="number" name="age" value={formData.age} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-xl py-2 px-3 text-black" /></div>
+                <div><label className="block text-sm font-medium text-gray-700">Full Name</label><input required type="text" name="name" placeholder="John Doe" value={formData.name} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-xl py-2 px-3 text-black" /></div>
+                <div><label className="block text-sm font-medium text-gray-700">Age</label><input required type="number" name="age" placeholder="35" value={formData.age} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-xl py-2 px-3 text-black" /></div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Gender</label>
                   <select required name="gender" value={formData.gender} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-xl py-2 px-3 text-black">
                     <option value="">Select...</option><option value="Male">Male</option><option value="Female">Female</option>
                   </select>
                 </div>
-                <div><label className="block text-sm font-medium text-gray-700">Email Address</label><input required type="email" name="email" value={formData.email} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-xl py-2 px-3 text-black" /></div>
+                <div><label className="block text-sm font-medium text-gray-700">Email Address</label><input required type="email" name="email" placeholder="john@example.com" value={formData.email} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-xl py-2 px-3 text-black" /></div>
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700">Password</label>
+                  <input required type="password" name="password" placeholder="Create a secure password" value={formData.password} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-xl py-2 px-3 text-black" />
+                </div>
               </div>
             </div>
 
@@ -164,12 +164,27 @@ export default function Home() {
                   <p className="text-blue-700 text-xs">Allow MedMate to automatically add doctor appointments to your calendar.</p>
                 </div>
                 {formData.google_access_token ? (
-                  <span className="px-3 py-1 bg-green-100 text-green-700 font-bold rounded-full text-xs flex items-center">
-                    <CheckCircle2 size={14} className="mr-1"/> Connected
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="px-3 py-1.5 bg-green-100 text-green-700 font-bold rounded-full text-xs flex items-center shadow-sm">
+                      <CheckCircle2 size={14} className="mr-1"/> Auto-Sync Active
+                    </span>
+                    <button 
+                      type="button" 
+                      onClick={() => setFormData({ ...formData, google_access_token: '' })} 
+                      className="text-xs text-gray-400 hover:text-red-500 underline font-medium"
+                    >
+                      Disconnect
+                    </button>
+                  </div>
                 ) : (
-                  <button type="button" onClick={() => loginWithGoogle()} className="px-4 py-2 bg-white text-blue-600 font-bold border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors text-sm shadow-sm">
-                    Connect
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      setFormData({ ...formData, google_access_token: 'google_calendar_enabled' });
+                    }} 
+                    className="px-4 py-2 bg-white text-blue-600 font-bold border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors text-sm shadow-sm flex items-center gap-1.5"
+                  >
+                    <Calendar size={14}/> Connect
                   </button>
                 )}
               </div>

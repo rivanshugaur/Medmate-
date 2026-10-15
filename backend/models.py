@@ -11,6 +11,7 @@ class Patient(Base):
     age = Column(Integer)
     gender = Column(String)
     email = Column(String, unique=True, index=True)
+    password = Column(String, nullable=True)
     emergency_contact_name = Column(String, nullable=True)
     emergency_contact_phone = Column(String, nullable=True)
     primary_doctor_id = Column(Integer, ForeignKey("doctors.id"), nullable=True)
