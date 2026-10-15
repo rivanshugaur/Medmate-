@@ -196,7 +196,7 @@ export default function Home() {
           </div>
           <div className="hidden md:flex gap-6 items-center">
             <a href="#features" className="text-sm font-bold text-gray-600 hover:text-emerald-600">Features</a>
-            <a href="http://localhost:3000/doctor" className="text-sm font-bold text-blue-600 bg-blue-50 px-4 py-2 rounded-full hover:bg-blue-100 transition-colors">Provider Portal</a>
+            <a href="/doctor" className="text-sm font-bold text-blue-600 bg-blue-50 px-4 py-2 rounded-full hover:bg-blue-100 transition-colors">Provider Portal</a>
           </div>
           <div className="flex gap-3">
             <button onClick={() => setView('login')} className="text-sm font-bold text-emerald-700 bg-emerald-50 px-5 py-2.5 rounded-full hover:bg-emerald-100 transition-colors">Log In</button>
